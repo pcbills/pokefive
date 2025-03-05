@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokefive Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: #000;
+    }
+    
+    .help-section {
+      margin-bottom: 20px;
+    }
+    
+    .help-section h3 {
+      color: #3B4CCA;
+      border-bottom: 2px solid #FFDE00;
+      padding-bottom: 5px;
+      margin-top: 20px;
+    }
+    
+    .help-section ul {
+      columns: 2;
+      list-style-type: none;
+      padding-left: 0;
+    }
+    
+    @media (max-width: 600px) {
+      .help-section ul {
+        columns: 1;
+      }
+    }
+    
+    .help-section li {
+      padding: 4px 0;
+    }
+    
+    .help-button {
+      background-color: #3B4CCA;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      margin-left: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .help-button:hover {
+      background-color: #2A3A99;
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      color: #3B4CCA;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .pokemon-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 767px) {
+      .pokemon-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .pokemon-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .pokemon-card {
+      background-color: #f8f8f8;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+    
+    .pokemon-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .pokemon-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+    
+    .pokemon-name {
+      font-weight: 600;
+      margin-top: 10px;
+      color: #333;
+    }
+    
+    .question-section {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .question-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .traits-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .trait-btn {
+      background-color: #FFDE00;
+      color: #3B4CCA;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .trait-btn:hover {
+      background-color: #3B4CCA;
+      color: #FFDE00;
+    }
+    
+    .trait-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .trait-btn.correct {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .trait-btn.answer {
+      background-color: #3B4CCA;
+      color: white;
+    }
+    
+    .result-message {
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .result-message.success {
+      background-color: #E8F5E9;
+      color: #2E7D32;
+    }
+    
+    .result-message.error {
+      background-color: #FFEBEE;
+      color: #C62828;
+    }
+    
+    .result-message p {
+      margin: 5px 0;
+    }
+    
+    .result-message p:first-child {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.2rem;
+      color: #666;
+    }
+    
+    .new-game-btn {
+      display: block;
+      margin: 0 auto;
+      background-color: #FF0000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .new-game-btn:hover {
+      background-color: #CC0000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Pokefive</h1>
+      <p>Try to guess what trait these five Pokémon have in common!</p>
+    </div>
+    
+    <div id="game-container">
+      <div id="loading" class="loading">
+        Loading Pokefive Game...
+      </div>
+    </div>
+  </div>
+  
+  <!-- Help Button moved to render function -->
+  
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeHelpModal()">&times;</span>
+      <h2>Pokefive Help Guide</h2>
+      <p>In Pokefive, you need to identify what trait five Pokémon have in common. Here's a guide to all the possible traits and values:</p>
+      
+      <div class="help-section">
+        <h3>Main Types</h3>
+        <ul id="typesList">
+          <li>Bug</li>
+          <li>Dark</li>
+          <li>Dragon</li>
+          <li>Electric</li>
+          <li>Fairy</li>
+          <li>Fighting</li>
+          <li>Fire</li>
+          <li>Flying</li>
+          <li>Ghost</li>
+          <li>Grass</li>
+          <li>Ground</li>
+          <li>Ice</li>
+          <li>Normal</li>
+          <li>Poison</li>
+          <li>Psychic</li>
+          <li>Rock</li>
+          <li>Steel</li>
+          <li>Water</li>
+        </ul>
+      </div>
+      
+      <div class="help-section">
+        <h3>Evolution Stages</h3>
+        <ul>
+          <li>Basic - The first form of a Pokémon</li>
+          <li>Stage 1 - The second form of a Pokémon</li>
+          <li>Stage 2 - The third form of a Pokémon</li>
+        </ul>
+      </div>
+      
+      <div class="help-section">
+        <h3>Generations</h3>
+        <ul>
+          <li>Generation 1 - Red, Blue, Yellow (Kanto)</li>
+          <li>Generation 2 - Gold, Silver, Crystal (Johto)</li>
+          <li>Generation 3 - Ruby, Sapphire, Emerald (Hoenn)</li>
+          <li>Generation 4 - Diamond, Pearl, Platinum (Sinnoh)</li>
+          <li>Generation 5 - Black, White (Unova)</li>
+          <li>Generation 6 - X, Y (Kalos)</li>
+          <li>Generation 7 - Sun, Moon (Alola)</li>
+          <li>Generation 8 - Sword, Shield (Galar)</li>
+          <li>Generation 9 - Scarlet, Violet (Paldea)</li>
+        </ul>
+      </div>
+      
+      <div class="help-section">
+        <h3>Weight Categories</h3>
+        <ul>
+          <li>Featherweight - Very light (0-10kg)</li>
+          <li>Lightweight - Light (10-30kg)</li>
+          <li>Middleweight - Medium (30-60kg)</li>
+          <li>Heavyweight - Heavy (60-120kg)</li>
+          <li>Superweight - Very heavy (120kg+)</li>
+        </ul>
+      </div>
+      
+      <div class="help-section">
+        <h3>Height Categories</h3>
+        <ul>
+          <li>Tiny - Very small (0-0.5m)</li>
+          <li>Small - Small (0.5-1.0m)</li>
+          <li>Medium - Medium (1.0-1.5m)</li>
+          <li>Large - Large (1.5-2.5m)</li>
+          <li>Gigantic - Very large (2.5m+)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let pokemonData = [];
+    let selectedPokemon = [];
+    let selectedTrait = '';
+    let selectedTraitValue = '';
+    let gameState = 'loading'; // loading, playing, win
+    let showAnswer = false;
+    
+    // Modal functions
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'block';
+    }
+    
+    function closeHelpModal() {
+      document.getElementById('helpModal').style.display = 'none';
+    }
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+      const modal = document.getElementById('helpModal');
+      if (event.target === modal) {
+        closeHelpModal();
+      }
+    };
+
+    // Define the possible traits
+    const traits = [
+      { id: 'mainType', name: 'Main Type' },
+      { id: 'evolutionStage', name: 'Evolution Stage' },
+      { id: 'generation', name: 'Generation' },
+      { id: 'weightCategory', name: 'Weight Category' },
+      { id: 'heightCategory', name: 'Height Category' }
+    ];
+
+    // Initialize the game
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPokemonData();
+    });
+
+    // Load Pokemon data
+    function loadPokemonData() {
+      try {
+        // In a real implementation, you'd fetch this data from a server
+        // For this demo, we'll use the embedded JSON
+        const pokemonJson = {
+          "pokemon": [
+    {
+      "name": "Bulbasaur",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 6.9,
+      "height": 0.7,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+    },
+    {
+      "name": "Charmander",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 8.5,
+      "height": 0.6,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
+    },
+    {
+      "name": "Squirtle",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 9.0,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"
+    },
+    {
+      "name": "Pikachu",
+      "mainType": "Electric",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 6.0,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+    },
+    {
+      "name": "Machamp",
+      "mainType": "Fighting",
+      "evolutionStage": "Stage 2",
+      "generation": 1,
+      "weight": 130.0,
+      "height": 1.6,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png"
+    },
+    {
+      "name": "Gengar",
+      "mainType": "Ghost",
+      "evolutionStage": "Stage 2",
+      "generation": 1,
+      "weight": 40.5,
+      "height": 1.5,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png"
+    },
+    {
+      "name": "Lapras",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 220.0,
+      "height": 2.5,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/131.png"
+    },
+    {
+      "name": "Eevee",
+      "mainType": "Normal",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 6.5,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/133.png"
+    },
+    {
+      "name": "Snorlax",
+      "mainType": "Normal",
+      "evolutionStage": "Basic",
+      "generation": 1,
+      "weight": 460.0,
+      "height": 2.1,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/143.png"
+    },
+    {
+      "name": "Chikorita",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 2,
+      "weight": 6.4,
+      "height": 0.9,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/152.png"
+    },
+    {
+      "name": "Cyndaquil",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 2,
+      "weight": 7.9,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/155.png"
+    },
+    {
+      "name": "Totodile",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 2,
+      "weight": 9.5,
+      "height": 0.6,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/158.png"
+    },
+    {
+      "name": "Ampharos",
+      "mainType": "Electric",
+      "evolutionStage": "Stage 2",
+      "generation": 2,
+      "weight": 61.5,
+      "height": 1.4,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/181.png"
+    },
+    {
+      "name": "Bellossom",
+      "mainType": "Grass",
+      "evolutionStage": "Stage 2",
+      "generation": 2,
+      "weight": 5.8,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/182.png"
+    },
+    {
+      "name": "Marill",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 2,
+      "weight": 8.5,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/183.png"
+    },
+    {
+      "name": "Umbreon",
+      "mainType": "Dark",
+      "evolutionStage": "Stage 1",
+      "generation": 2,
+      "weight": 27.0,
+      "height": 1.0,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/197.png"
+    },
+    {
+      "name": "Scizor",
+      "mainType": "Bug",
+      "evolutionStage": "Stage 1",
+      "generation": 2,
+      "weight": 118.0,
+      "height": 1.8,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/212.png"
+    },
+    {
+      "name": "Tyranitar",
+      "mainType": "Rock",
+      "evolutionStage": "Stage 2",
+      "generation": 2,
+      "weight": 202.0,
+      "height": 2.0,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/248.png"
+    },
+    {
+      "name": "Treecko",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 3,
+      "weight": 5.0,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/252.png"
+    },
+    {
+      "name": "Combusken",
+      "mainType": "Fire",
+      "evolutionStage": "Stage 1",
+      "generation": 3,
+      "weight": 19.5,
+      "height": 0.9,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/256.png"
+    },
+    {
+      "name": "Swampert",
+      "mainType": "Water",
+      "evolutionStage": "Stage 2",
+      "generation": 3,
+      "weight": 81.9,
+      "height": 1.5,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/260.png"
+    },
+    {
+      "name": "Gardevoir",
+      "mainType": "Psychic",
+      "evolutionStage": "Stage 2",
+      "generation": 3,
+      "weight": 48.4,
+      "height": 1.6,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/282.png"
+    },
+    {
+      "name": "Breloom",
+      "mainType": "Grass",
+      "evolutionStage": "Stage 1",
+      "generation": 3,
+      "weight": 39.2,
+      "height": 1.2,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/286.png"
+    },
+    {
+      "name": "Aggron",
+      "mainType": "Steel",
+      "evolutionStage": "Stage 2",
+      "generation": 3,
+      "weight": 360.0,
+      "height": 2.1,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/306.png"
+    },
+    {
+      "name": "Wailord",
+      "mainType": "Water",
+      "evolutionStage": "Stage 1",
+      "generation": 3,
+      "weight": 398.0,
+      "height": 14.5,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/321.png"
+    },
+    {
+      "name": "Flygon",
+      "mainType": "Ground",
+      "evolutionStage": "Stage 2",
+      "generation": 3,
+      "weight": 82.0,
+      "height": 2.0,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/330.png"
+    },
+    {
+      "name": "Salamence",
+      "mainType": "Dragon",
+      "evolutionStage": "Stage 2",
+      "generation": 3,
+      "weight": 102.6,
+      "height": 1.5,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/373.png"
+    },
+    {
+      "name": "Turtwig",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 4,
+      "weight": 10.2,
+      "height": 0.4,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/387.png"
+    },
+    {
+      "name": "Chimchar",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 4,
+      "weight": 6.2,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/390.png"
+    },
+    {
+      "name": "Piplup",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 4,
+      "weight": 5.2,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/393.png"
+    },
+    {
+      "name": "Luxray",
+      "mainType": "Electric",
+      "evolutionStage": "Stage 2",
+      "generation": 4,
+      "weight": 42.0,
+      "height": 1.4,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/405.png"
+    },
+    {
+      "name": "Roserade",
+      "mainType": "Grass",
+      "evolutionStage": "Stage 2",
+      "generation": 4,
+      "weight": 14.5,
+      "height": 0.9,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/407.png"
+    },
+    {
+      "name": "Garchomp",
+      "mainType": "Dragon",
+      "evolutionStage": "Stage 2",
+      "generation": 4,
+      "weight": 95.0,
+      "height": 1.9,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/445.png"
+    },
+    {
+      "name": "Lucario",
+      "mainType": "Fighting",
+      "evolutionStage": "Stage 1",
+      "generation": 4,
+      "weight": 54.0,
+      "height": 1.2,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/448.png"
+    },
+    {
+      "name": "Glaceon",
+      "mainType": "Ice",
+      "evolutionStage": "Stage 1",
+      "generation": 4,
+      "weight": 25.9,
+      "height": 0.8,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/471.png"
+    },
+    {
+      "name": "Gallade",
+      "mainType": "Psychic",
+      "evolutionStage": "Stage 2",
+      "generation": 4,
+      "weight": 52.0,
+      "height": 1.6,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/475.png"
+    },
+    {
+      "name": "Snivy",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 5,
+      "weight": 8.1,
+      "height": 0.6,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/495.png"
+    },
+    {
+      "name": "Tepig",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 5,
+      "weight": 9.9,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/498.png"
+    },
+    {
+      "name": "Oshawott",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 5,
+      "weight": 5.9,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/501.png"
+    },
+    {
+      "name": "Excadrill",
+      "mainType": "Ground",
+      "evolutionStage": "Stage 1",
+      "generation": 5,
+      "weight": 40.4,
+      "height": 0.7,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/530.png"
+    },
+    {
+      "name": "Zoroark",
+      "mainType": "Dark",
+      "evolutionStage": "Stage 1",
+      "generation": 5,
+      "weight": 81.1,
+      "height": 1.6,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/571.png"
+    },
+    {
+      "name": "Chandelure",
+      "mainType": "Ghost",
+      "evolutionStage": "Stage 2",
+      "generation": 5,
+      "weight": 34.3,
+      "height": 1.0,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/609.png"
+    },
+    {
+      "name": "Hydreigon",
+      "mainType": "Dark",
+      "evolutionStage": "Stage 2",
+      "generation": 5,
+      "weight": 160.0,
+      "height": 1.8,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/635.png"
+    },
+    {
+      "name": "Volcarona",
+      "mainType": "Bug",
+      "evolutionStage": "Stage 1",
+      "generation": 5,
+      "weight": 46.0,
+      "height": 1.6,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/637.png"
+    },
+    {
+      "name": "Reshiram",
+      "mainType": "Dragon",
+      "evolutionStage": "Basic",
+      "generation": 5,
+      "weight": 330.0,
+      "height": 3.2,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/643.png"
+    },
+    {
+      "name": "Chespin",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 6,
+      "weight": 9.0,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/650.png"
+    },
+    {
+      "name": "Fennekin",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 6,
+      "weight": 9.4,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/653.png"
+    },
+    {
+      "name": "Froakie",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 6,
+      "weight": 7.0,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png"
+    },
+    {
+      "name": "Aegislash",
+      "mainType": "Steel",
+      "evolutionStage": "Stage 2",
+      "generation": 6,
+      "weight": 53.0,
+      "height": 1.7,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/681.png"
+    },
+    {
+      "name": "Sylveon",
+      "mainType": "Fairy",
+      "evolutionStage": "Stage 1",
+      "generation": 6,
+      "weight": 23.5,
+      "height": 1.0,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/700.png"
+    },
+    {
+      "name": "Hawlucha",
+      "mainType": "Fighting",
+      "evolutionStage": "Basic",
+      "generation": 6,
+      "weight": 21.5,
+      "height": 0.8,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/701.png"
+    },
+    {
+      "name": "Goodra",
+      "mainType": "Dragon",
+      "evolutionStage": "Stage 2",
+      "generation": 6,
+      "weight": 150.5,
+      "height": 2.0,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/706.png"
+    },
+    {
+      "name": "Noivern",
+      "mainType": "Flying",
+      "evolutionStage": "Stage 1",
+      "generation": 6,
+      "weight": 85.0,
+      "height": 1.5,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/715.png"
+    },
+    {
+      "name": "Xerneas",
+      "mainType": "Fairy",
+      "evolutionStage": "Basic",
+      "generation": 6,
+      "weight": 215.0,
+      "height": 3.0,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/716.png"
+    },
+    {
+      "name": "Rowlet",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 7,
+      "weight": 1.5,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/722.png"
+    },
+    {
+      "name": "Litten",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 7,
+      "weight": 4.3,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/725.png"
+    },
+    {
+      "name": "Primarina",
+      "mainType": "Water",
+      "evolutionStage": "Stage 2",
+      "generation": 7,
+      "weight": 44.0,
+      "height": 1.8,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/730.png"
+    },
+    {
+      "name": "Lycanroc",
+      "mainType": "Rock",
+      "evolutionStage": "Stage 1",
+      "generation": 7,
+      "weight": 25.0,
+      "height": 0.8,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/745.png"
+    },
+    {
+      "name": "Toxapex",
+      "mainType": "Poison",
+      "evolutionStage": "Stage 1",
+      "generation": 7,
+      "weight": 14.5,
+      "height": 0.7,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/748.png"
+    },
+    {
+      "name": "Mimikyu",
+      "mainType": "Ghost",
+      "evolutionStage": "Basic",
+      "generation": 7,
+      "weight": 0.7,
+      "height": 0.2,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/778.png"
+    },
+    {
+      "name": "Kommo-o",
+      "mainType": "Dragon",
+      "evolutionStage": "Stage 2",
+      "generation": 7,
+      "weight": 78.2,
+      "height": 1.6,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/784.png"
+    },
+    {
+      "name": "Necrozma",
+      "mainType": "Psychic",
+      "evolutionStage": "Basic",
+      "generation": 7,
+      "weight": 230.0,
+      "height": 2.4,
+      "weightCategory": "Superweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/800.png"
+    },
+    {
+      "name": "Zeraora",
+      "mainType": "Electric",
+      "evolutionStage": "Basic",
+      "generation": 7,
+      "weight": 44.5,
+      "height": 1.5,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/807.png"
+    },
+    {
+      "name": "Grookey",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 8,
+      "weight": 5.0,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/810.png"
+    },
+    {
+      "name": "Scorbunny",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 8,
+      "weight": 4.5,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/813.png"
+    },
+    {
+      "name": "Sobble",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 8,
+      "weight": 4.0,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/816.png"
+    },
+    {
+      "name": "Corviknight",
+      "mainType": "Flying",
+      "evolutionStage": "Stage 2",
+      "generation": 8,
+      "weight": 75.0,
+      "height": 2.2,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/823.png"
+    },
+    {
+      "name": "Toxtricity",
+      "mainType": "Electric",
+      "evolutionStage": "Stage 1",
+      "generation": 8,
+      "weight": 40.0,
+      "height": 1.6,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/849.png"
+    },
+    {
+      "name": "Hatterene",
+      "mainType": "Psychic",
+      "evolutionStage": "Stage 2",
+      "generation": 8,
+      "weight": 5.1,
+      "height": 2.1,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Large",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/858.png"
+    },
+    {
+      "name": "Grimmsnarl",
+      "mainType": "Dark",
+      "evolutionStage": "Stage 2",
+      "generation": 8,
+      "weight": 61.0,
+      "height": 1.5,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/861.png"
+    },
+    {
+      "name": "Dragapult",
+      "mainType": "Dragon",
+      "evolutionStage": "Stage 2",
+      "generation": 8,
+      "weight": 50.0,
+      "height": 3.0,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/887.png"
+    },
+    {
+      "name": "Zacian",
+      "mainType": "Fairy",
+      "evolutionStage": "Basic",
+      "generation": 8,
+      "weight": 110.0,
+      "height": 2.8,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/888.png"
+    },
+    {
+      "name": "Sprigatito",
+      "mainType": "Grass",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 4.1,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/906.png"
+    },
+    {
+      "name": "Fuecoco",
+      "mainType": "Fire",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 9.8,
+      "height": 0.4,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/909.png"
+    },
+    {
+      "name": "Quaxly",
+      "mainType": "Water",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 6.1,
+      "height": 0.5,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/912.png"
+    },
+    {
+      "name": "Lechonk",
+      "mainType": "Normal",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 10.2,
+      "height": 0.5,
+      "weightCategory": "Lightweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/915.png"
+    },
+    {
+      "name": "Pawmi",
+      "mainType": "Electric",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 2.5,
+      "height": 0.3,
+      "weightCategory": "Featherweight",
+      "heightCategory": "Tiny",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/921.png"
+    },
+    {
+      "name": "Cetitan",
+      "mainType": "Ice",
+      "evolutionStage": "Stage 1",
+      "generation": 9,
+      "weight": 700.0,
+      "height": 4.5,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/975.png"
+    },
+    {
+      "name": "Annihilape",
+      "mainType": "Fighting",
+      "evolutionStage": "Stage 2",
+      "generation": 9,
+      "weight": 56.0,
+      "height": 1.2,
+      "weightCategory": "Middleweight",
+      "heightCategory": "Medium",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/979.png"
+    },
+    {
+      "name": "Tinkaton",
+      "mainType": "Fairy",
+      "evolutionStage": "Stage 2",
+      "generation": 9,
+      "weight": 112.8,
+      "height": 0.7,
+      "weightCategory": "Heavyweight",
+      "heightCategory": "Small",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/959.png"
+    },
+    {
+      "name": "Miraidon",
+      "mainType": "Electric",
+      "evolutionStage": "Basic",
+      "generation": 9,
+      "weight": 240.0,
+      "height": 3.5,
+      "weightCategory": "Superweight",
+      "heightCategory": "Gigantic",
+      "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1008.png"
+    }
+  ]
+        };
+        
+        pokemonData = pokemonJson.pokemon;
+        startNewGame();
+      } catch (error) {
+        console.error('Error loading Pokemon data:', error);
+      }
+    }
+
+    // Start a new game
+    function startNewGame() {
+      if (pokemonData.length === 0) return;
+      
+      showAnswer = false;
+      
+      // 1. Choose a random trait
+      const randomTraitIndex = Math.floor(Math.random() * traits.length);
+      const chosenTrait = traits[randomTraitIndex].id;
+      selectedTrait = chosenTrait;
+      
+      // 2. Get all possible values for this trait
+      const traitValues = [...new Set(pokemonData.map(p => p[chosenTrait]))];
+      
+      // 3. Choose a random value for the trait
+      const randomValueIndex = Math.floor(Math.random() * traitValues.length);
+      const chosenValue = traitValues[randomValueIndex];
+      selectedTraitValue = chosenValue;
+      
+      // 4. Find all Pokemon with this trait value
+      const matchingPokemon = pokemonData.filter(p => p[chosenTrait] === chosenValue);
+      
+      // 5. Choose 5 random Pokemon from the matching ones
+      const selectedFive = [];
+      const tempMatchingPokemon = [...matchingPokemon];
+      
+      // Make sure we have at least 5 matching Pokemon
+      if (tempMatchingPokemon.length < 5) {
+        console.error('Not enough Pokemon with this trait value:', chosenTrait, chosenValue);
+        // Try again with a different trait
+        startNewGame();
+        return;
+      }
+      
+      for (let i = 0; i < 5; i++) {
+        const randomIndex = Math.floor(Math.random() * tempMatchingPokemon.length);
+        selectedFive.push(tempMatchingPokemon[randomIndex]);
+        tempMatchingPokemon.splice(randomIndex, 1);
+      }
+      
+      selectedPokemon = selectedFive;
+      gameState = 'playing';
+      
+      renderGame();
+    }
+
+    // Handle trait guess
+    function handleGuess(traitId) {
+      if (traitId === selectedTrait) {
+        gameState = 'win';
+      } else {
+        showAnswer = true;
+      }
+      
+      renderGame();
+    }
+
+    // Render the game UI
+    function renderGame() {
+      const gameContainer = document.getElementById('game-container');
+      
+      if (gameState === 'loading') {
+        gameContainer.innerHTML = `
+          <div class="loading">
+            Loading Pokefive Game...
+          </div>
+        `;
+        return;
+      }
+      
+      // Create Pokemon cards HTML
+      const pokemonCardsHTML = selectedPokemon.map(pokemon => `
+        <div class="pokemon-card">
+          <img src="${pokemon.iconUrl}" alt="${pokemon.name}" class="pokemon-img">
+          <div class="pokemon-name">${pokemon.name}</div>
+        </div>
+      `).join('');
+      
+      // Create trait buttons HTML
+      const traitButtonsHTML = traits.map(trait => {
+        let buttonClass = 'trait-btn';
+        
+        if (gameState === 'win' && trait.id === selectedTrait) {
+          buttonClass += ' correct';
+        } else if (showAnswer && trait.id === selectedTrait) {
+          buttonClass += ' answer';
+        }
+        
+        return `
+          <button class="${buttonClass}" 
+                  onclick="handleGuess('${trait.id}')"
+                  ${(gameState === 'win' || showAnswer) ? 'disabled' : ''}>
+            ${trait.name}
+          </button>
+        `;
+      }).join('');
+      
+      // Create result message HTML
+      let resultMessageHTML = '';
+      
+      if (gameState === 'win') {
+        const traitName = traits.find(t => t.id === selectedTrait).name;
+        resultMessageHTML = `
+          <div class="result-message success">
+            <p>Correct! 🎉</p>
+            <p>All these Pokémon share the ${traitName}: <strong>${selectedTraitValue}</strong></p>
+          </div>
+        `;
+      } else if (showAnswer) {
+        const traitName = traits.find(t => t.id === selectedTrait).name;
+        resultMessageHTML = `
+          <div class="result-message error">
+            <p>Not quite! Try again!</p>
+            <p>These Pokémon share the ${traitName}: <strong>${selectedTraitValue}</strong></p>
+          </div>
+        `;
+      }
+      
+      // Assemble the full HTML
+      gameContainer.innerHTML = `
+        <div class="pokemon-container">
+          ${pokemonCardsHTML}
+        </div>
+        
+        <div class="question-section">
+          <h2>Which trait do these Pokémon share?</h2>
+          <div class="traits-buttons">
+            ${traitButtonsHTML}
+          </div>
+        </div>
+        
+        ${resultMessageHTML}
+        
+        <div class="button-container">
+          <button class="new-game-btn" onclick="startNewGame()">New Game</button>
+          <button class="help-button" onclick="openHelpModal()">Help</button>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
