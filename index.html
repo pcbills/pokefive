@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pokefive</title>
+<title>Pokéfive</title>
 <style>
 /* Reset and base styles */
 * {
@@ -353,7 +353,7 @@ body {
 </head>
 <body>
 <div class="game-header">
-<h1 class="game-title">Pokefive</h1>
+<h1 class="game-title">Pokéfive</h1>
 <button id="help-button">?</button>
 </div>
 
@@ -380,10 +380,10 @@ body {
 
 <div id="help-modal" class="hidden">
 <div class="bg-white">
-  <h2 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">How to Play Pokefive</h2>
+  <h2 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">How to Play Pokéfive</h2>
   <div class="space-y-4">
     <p>
-      Pokefive is a Pokémon trait matching game where you need to identify what trait five Pokémon have in common.
+      Pokéfive is a Pokémon trait matching game where you need to identify what trait five Pokémon have in common.
     </p>
     <br>
     <p>
@@ -629,7 +629,7 @@ function showWinMessage() {
     messageDiv.appendChild(trophy);
     
     const text = document.createElement('div');
-    text.textContent = ['Amazing!', 'Poké-tastic!', 'That\'s Pokefive!'][Math.floor(Math.random() * 3)];
+    text.textContent = ['Amazing!', 'Poké-tastic!', 'That\'s Pokéfive!'][Math.floor(Math.random() * 3)];
     messageDiv.appendChild(text);
     
     document.body.appendChild(messageDiv);
