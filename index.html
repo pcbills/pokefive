@@ -1,418 +1,434 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pokefive Game</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    
-    /* Modal styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-    }
-    
-    .modal-content {
-      background-color: #fff;
-      margin: 5% auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 800px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    .close-modal {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    
-    .close-modal:hover {
-      color: #000;
-    }
-    
-    .help-section {
-      margin-bottom: 20px;
-    }
-    
-    .help-section h3 {
-      color: #3B4CCA;
-      border-bottom: 2px solid #FFDE00;
-      padding-bottom: 5px;
-      margin-top: 20px;
-    }
-    
-    .help-section ul {
-      columns: 2;
-      list-style-type: none;
-      padding-left: 0;
-    }
-    
-    @media (max-width: 600px) {
-      .help-section ul {
-        columns: 1;
-      }
-    }
-    
-    .help-section li {
-      padding: 4px 0;
-    }
-    
-    .help-button {
-      background-color: #3B4CCA;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
-      margin-left: 10px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .help-button:hover {
-      background-color: #2A3A99;
-    }
-    
-    .button-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .header h1 {
-      color: #3B4CCA;
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-    
-    .header p {
-      color: #666;
-      font-size: 1.1rem;
-    }
-    
-    .pokemon-container {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
-    }
-    
-    @media (max-width: 767px) {
-      .pokemon-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .pokemon-container {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    .pokemon-card {
-      background-color: #f8f8f8;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.2s;
-    }
-    
-    .pokemon-card:hover {
-      transform: translateY(-5px);
-    }
-    
-    .pokemon-img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-    }
-    
-    .pokemon-name {
-      font-weight: 600;
-      margin-top: 10px;
-      color: #333;
-    }
-    
-    .question-section {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    
-    .question-section h2 {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-      color: #333;
-    }
-    
-    .traits-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
-    
-    .trait-btn {
-      background-color: #FFDE00;
-      color: #3B4CCA;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .trait-btn:hover {
-      background-color: #3B4CCA;
-      color: #FFDE00;
-    }
-    
-    .trait-btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    .trait-btn.correct {
-      background-color: #4CAF50;
-      color: white;
-    }
-    
-    .trait-btn.answer {
-      background-color: #3B4CCA;
-      color: white;
-    }
-    
-    .result-message {
-      text-align: center;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    
-    .result-message.success {
-      background-color: #E8F5E9;
-      color: #2E7D32;
-    }
-    
-    .result-message.error {
-      background-color: #FFEBEE;
-      color: #C62828;
-    }
-    
-    .result-message p {
-      margin: 5px 0;
-    }
-    
-    .result-message p:first-child {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      font-size: 1.2rem;
-      color: #666;
-    }
-    
-    .new-game-btn {
-      display: block;
-      margin: 0 auto;
-      background-color: #FF0000;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .new-game-btn:hover {
-      background-color: #CC0000;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pokefive</title>
+<style>
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-correct: #6aaa64;
+  --color-present: #c9b458;
+  --color-absent: #787c7e;
+  --color-background: #ffffff;
+  --color-border: #d3d6da;
+  --font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-background);
+  min-height: 100vh;
+  padding: 10px;
+}
+
+/* Header styles */
+.game-header {
+  text-align: center;
+  padding: 5px 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.game-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1b;
+}
+
+#help-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background: white;
+  border: none;
+  cursor: pointer;
+  z-index: 50;
+  transition: background-color 0.2s;
+}
+
+#help-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Game container */
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Pokemon display section */
+.pokemon-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pokemon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(20% - 8px);
+  margin-bottom: 10px;
+}
+
+.pokemon-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  margin-bottom: 8px;
+}
+
+.pokemon-inputs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+}
+
+.input-box {
+  height: 36px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: white;
+  padding: 0 5px;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.85rem;
+}
+
+.input-box.active {
+  border-color: var(--color-correct);
+  box-shadow: 0 0 5px rgba(106, 170, 100, 0.5);
+}
+
+.input-box.filled {
+  background-color: #f0f0f0;
+}
+
+.input-box.correct {
+  background-color: var(--color-correct);
+  color: white;
+  border-color: var(--color-correct);
+}
+
+/* Trait bank section */
+.trait-bank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.trait-item {
+  padding: 10px 15px;
+  background-color: var(--color-border);
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.trait-item:hover {
+  background-color: #c0c4c9;
+}
+
+/* Control buttons */
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.control-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--color-correct);
+  color: white;
+  font-family: var(--font-family);
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.control-button:hover {
+  filter: brightness(1.1);
+}
+
+/* Win message */
+#win-message {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 20px 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2), 0 0 20px rgba(106, 170, 100, 0.6);
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--color-correct);
+  z-index: 1000;
+  text-align: center;
+  animation: celebrate 0.6s ease-in-out;
+}
+
+@keyframes celebrate {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Help modal */
+#help-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: none;
+}
+
+#help-modal.hidden {
+  display: none;
+}
+
+#help-modal:not(.hidden) {
+  display: block;
+}
+
+.bg-white {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 28rem;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.list-disc {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+}
+
+.list-decimal {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 65%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* Trophy icon */
+.trophy {
+  display: block;
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: gold;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pokemon-container {
+    justify-content: center;
+  }
+
+  .pokemon-item {
+    width: calc(33.33% - 10px);
+  }
+}
+
+@media (max-width: 600px) {
+  .pokemon-item {
+    width: calc(50% - 10px);
+  }
+
+  .pokemon-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .trait-item {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .control-button {
+    padding: 8px 12px;
+    font-size: 0.7rem;
+  }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Pokefive</h1>
-      <p>Try to guess what trait these five Pokémon have in common!</p>
+<div class="game-header">
+<h1 class="game-title">Pokefive</h1>
+<button id="help-button">?</button>
+</div>
+
+<div class="game-container">
+<div class="pokemon-container" id="pokemon-container">
+  <!-- Pokemon images and input boxes will be inserted here -->
+</div>
+
+<div id="question-text" class="question-text">
+  What do these 5 Pokémon have in common?
+</div>
+
+<div class="trait-bank" id="trait-bank">
+  <!-- Trait buttons will be inserted here -->
+</div>
+
+<div class="control-buttons">
+  <button id="new-game-button" class="control-button">New Game</button>
+  <button id="show-answer-button" class="control-button">Show Answer</button>
+</div>
+</div>
+
+<div id="help-modal" class="hidden">
+<div class="bg-white">
+  <h2 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem;">How to Play Pokefive</h2>
+  <div class="space-y-4">
+    <p>
+      Pokefive is a Pokémon trait matching game where you need to identify what trait five Pokémon have in common.
+    </p>
+    <br>
+    <p>
+      Each set of five Pokémon shares one specific trait. Your task is to identify which trait they all have in common.
+    </p>
+
+    <div>
+      <h3 style="font-weight: bold; margin-bottom: 0.5rem;">How to Play:</h3>
+      <ol class="list-decimal">
+        <li style="margin-top: 0.5rem;">Look at the five displayed Pokémon</li>
+        <li style="margin-top: 0.5rem;">Click on the trait button you think all five Pokémon share</li>
+        <li style="margin-top: 0.5rem;">If correct, you win! If not, keep trying</li>
+        <li style="margin-top: 0.5rem;">Click "New Game" for a new set of Pokémon</li>
+      </ol>
     </div>
-    
-    <div id="game-container">
-      <div id="loading" class="loading">
-        Loading Pokefive Game...
-      </div>
-    </div>
-  </div>
-  
-  <!-- Help Button moved to render function -->
-  
-  <!-- Help Modal -->
-  <div id="helpModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeHelpModal()">&times;</span>
-      <h2>Pokefive Help Guide</h2>
-      <p>In Pokefive, you need to identify what trait five Pokémon have in common. Here's a guide to all the possible traits and values:</p>
-      
-      <div class="help-section">
-        <h3>Main Types</h3>
-        <ul id="typesList">
-          <li>Bug</li>
-          <li>Dark</li>
-          <li>Dragon</li>
-          <li>Electric</li>
-          <li>Fairy</li>
-          <li>Fighting</li>
-          <li>Fire</li>
-          <li>Flying</li>
-          <li>Ghost</li>
-          <li>Grass</li>
-          <li>Ground</li>
-          <li>Ice</li>
-          <li>Normal</li>
-          <li>Poison</li>
-          <li>Psychic</li>
-          <li>Rock</li>
-          <li>Steel</li>
-          <li>Water</li>
-        </ul>
-      </div>
-      
-      <div class="help-section">
-        <h3>Evolution Stages</h3>
-        <ul>
-          <li>Basic - The first form of a Pokémon</li>
-          <li>Stage 1 - The second form of a Pokémon</li>
-          <li>Stage 2 - The third form of a Pokémon</li>
-        </ul>
-      </div>
-      
-      <div class="help-section">
-        <h3>Generations</h3>
-        <ul>
-          <li>Generation 1 - Red, Blue, Yellow (Kanto)</li>
-          <li>Generation 2 - Gold, Silver, Crystal (Johto)</li>
-          <li>Generation 3 - Ruby, Sapphire, Emerald (Hoenn)</li>
-          <li>Generation 4 - Diamond, Pearl, Platinum (Sinnoh)</li>
-          <li>Generation 5 - Black, White (Unova)</li>
-          <li>Generation 6 - X, Y (Kalos)</li>
-          <li>Generation 7 - Sun, Moon (Alola)</li>
-          <li>Generation 8 - Sword, Shield (Galar)</li>
-          <li>Generation 9 - Scarlet, Violet (Paldea)</li>
-        </ul>
-      </div>
-      
-      <div class="help-section">
-        <h3>Weight Categories</h3>
-        <ul>
-          <li>Featherweight - Very light (0-10kg)</li>
-          <li>Lightweight - Light (10-30kg)</li>
-          <li>Middleweight - Medium (30-60kg)</li>
-          <li>Heavyweight - Heavy (60-120kg)</li>
-          <li>Superweight - Very heavy (120kg+)</li>
-        </ul>
-      </div>
-      
-      <div class="help-section">
-        <h3>Height Categories</h3>
-        <ul>
-          <li>Tiny - Very small (0-0.5m)</li>
-          <li>Small - Small (0.5-1.0m)</li>
-          <li>Medium - Medium (1.0-1.5m)</li>
-          <li>Large - Large (1.5-2.5m)</li>
-          <li>Gigantic - Very large (2.5m+)</li>
-        </ul>
-      </div>
+
+    <div>
+      <h3 style="font-weight: bold; margin-bottom: 0.5rem; margin-top: 1rem;">Possible Traits:</h3>
+      <ul class="list-disc">
+        <li style="margin-top: 0.5rem;">Main Type (Fire, Water, Grass, etc.)</li>
+        <li style="margin-top: 0.5rem;">Evolution Stage (Basic, Stage 1, Stage 2)</li>
+        <li style="margin-top: 0.5rem;">Generation (1-9)</li>
+        <li style="margin-top: 0.5rem;">Weight Category (Featherweight to Superweight)</li>
+        <li style="margin-top: 0.5rem;">Height Category (Tiny to Gigantic)</li>
+      </ul>
     </div>
   </div>
+</div>
+</div>
 
-  <script>
-    // Game state
-    let pokemonData = [];
-    let selectedPokemon = [];
-    let selectedTrait = '';
-    let selectedTraitValue = '';
-    let gameState = 'loading'; // loading, playing, win
-    let showAnswer = false;
-    
-    // Modal functions
-    function openHelpModal() {
-      document.getElementById('helpModal').style.display = 'block';
-    }
-    
-    function closeHelpModal() {
-      document.getElementById('helpModal').style.display = 'none';
-    }
-    
-    // Close modal when clicking outside of it
-    window.onclick = function(event) {
-      const modal = document.getElementById('helpModal');
-      if (event.target === modal) {
-        closeHelpModal();
-      }
-    };
+<script>
+// Game state
+let pokemonData = [];
+let selectedPokemon = [];
+let selectedTrait = '';
+let selectedTraitValue = '';
+let gameState = 'loading'; // loading, playing, win
+let answerRevealed = false;
 
-    // Define the possible traits
-    const traits = [
-      { id: 'mainType', name: 'Main Type' },
-      { id: 'evolutionStage', name: 'Evolution Stage' },
-      { id: 'generation', name: 'Generation' },
-      { id: 'weightCategory', name: 'Weight Category' },
-      { id: 'heightCategory', name: 'Height Category' }
-    ];
+// Define the possible traits
+const traits = [
+  { id: 'mainType', name: 'Main Type' },
+  { id: 'evolutionStage', name: 'Evolution Stage' },
+  { id: 'generation', name: 'Generation' },
+  { id: 'weightCategory', name: 'Weight Category' },
+  { id: 'heightCategory', name: 'Height Category' }
+];
 
-    // Initialize the game
-    document.addEventListener('DOMContentLoaded', () => {
-      loadPokemonData();
-    });
+// DOM Elements
+const elements = {
+  pokemonContainer: document.getElementById('pokemon-container'),
+  questionText: document.getElementById('question-text'),
+  traitBank: document.getElementById('trait-bank'),
+  newGameButton: document.getElementById('new-game-button'),
+  showAnswerButton: document.getElementById('show-answer-button'),
+  helpButton: document.getElementById('help-button'),
+  helpModal: document.getElementById('help-modal')
+};
 
-    // Load Pokemon data
-    function loadPokemonData() {
-      try {
-        // In a real implementation, you'd fetch this data from a server
-        // For this demo, we'll use the embedded JSON
-        const pokemonJson = {
-          "pokemon": [
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+  loadPokemonData();
+  setupHelpModal();
+});
+
+// Load Pokemon data
+function loadPokemonData() {
+  try {
+    // In a real implementation, you'd fetch this data from a server
+    // For this demo, we'll use the embedded JSON
+    const pokemonJson = {
+      "pokemon": [
     {
       "name": "Bulbasaur",
       "mainType": "Grass",
@@ -1305,154 +1321,219 @@
       "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1008.png"
     }
   ]
-        };
-        
-        pokemonData = pokemonJson.pokemon;
-        startNewGame();
-      } catch (error) {
-        console.error('Error loading Pokemon data:', error);
-      }
-    }
+    };
+    
+    pokemonData = pokemonJson.pokemon;
+    startNewGame();
+  } catch (error) {
+    console.error('Error loading Pokemon data:', error);
+  }
+}
 
-    // Start a new game
-    function startNewGame() {
-      if (pokemonData.length === 0) return;
-      
-      showAnswer = false;
-      
-      // 1. Choose a random trait
-      const randomTraitIndex = Math.floor(Math.random() * traits.length);
-      const chosenTrait = traits[randomTraitIndex].id;
-      selectedTrait = chosenTrait;
-      
-      // 2. Get all possible values for this trait
-      const traitValues = [...new Set(pokemonData.map(p => p[chosenTrait]))];
-      
-      // 3. Choose a random value for the trait
-      const randomValueIndex = Math.floor(Math.random() * traitValues.length);
-      const chosenValue = traitValues[randomValueIndex];
-      selectedTraitValue = chosenValue;
-      
-      // 4. Find all Pokemon with this trait value
-      const matchingPokemon = pokemonData.filter(p => p[chosenTrait] === chosenValue);
-      
-      // 5. Choose 5 random Pokemon from the matching ones
-      const selectedFive = [];
-      const tempMatchingPokemon = [...matchingPokemon];
-      
-      // Make sure we have at least 5 matching Pokemon
-      if (tempMatchingPokemon.length < 5) {
-        console.error('Not enough Pokemon with this trait value:', chosenTrait, chosenValue);
-        // Try again with a different trait
-        startNewGame();
-        return;
-      }
-      
-      for (let i = 0; i < 5; i++) {
-        const randomIndex = Math.floor(Math.random() * tempMatchingPokemon.length);
-        selectedFive.push(tempMatchingPokemon[randomIndex]);
-        tempMatchingPokemon.splice(randomIndex, 1);
-      }
-      
-      selectedPokemon = selectedFive;
-      gameState = 'playing';
-      
-      renderGame();
-    }
+// Start a new game
+function startNewGame() {
+  if (pokemonData.length === 0) return;
+  
+  answerRevealed = false;
+  
+  // Reset the question text
+  elements.questionText.textContent = "What do these 5 Pokémon have in common?";
+  elements.questionText.style.fontWeight = "bold";
+  elements.questionText.style.color = "#333";
+  
+  // 1. Choose a random trait
+  const randomTraitIndex = Math.floor(Math.random() * traits.length);
+  const chosenTrait = traits[randomTraitIndex].id;
+  selectedTrait = chosenTrait;
+  
+  // 2. Get all possible values for this trait
+  const traitValues = [...new Set(pokemonData.map(p => p[chosenTrait]))];
+  
+  // 3. Choose a random value for the trait
+  const randomValueIndex = Math.floor(Math.random() * traitValues.length);
+  const chosenValue = traitValues[randomValueIndex];
+  selectedTraitValue = chosenValue;
+  
+  // 4. Find all Pokemon with this trait value
+  const matchingPokemon = pokemonData.filter(p => p[chosenTrait] === chosenValue);
+  
+  // 5. Choose 5 random Pokemon from the matching ones
+  const selectedFive = [];
+  const tempMatchingPokemon = [...matchingPokemon];
+  
+  // Make sure we have at least 5 matching Pokemon
+  if (tempMatchingPokemon.length < 5) {
+    console.error('Not enough Pokemon with this trait value:', chosenTrait, chosenValue);
+    // Try again with a different trait
+    startNewGame();
+    return;
+  }
+  
+  for (let i = 0; i < 5; i++) {
+    const randomIndex = Math.floor(Math.random() * tempMatchingPokemon.length);
+    selectedFive.push(tempMatchingPokemon[randomIndex]);
+    tempMatchingPokemon.splice(randomIndex, 1);
+  }
+  
+  selectedPokemon = selectedFive;
+  gameState = 'playing';
+  
+  renderPokemon();
+  renderTraitButtons();
+}
 
-    // Handle trait guess
-    function handleGuess(traitId) {
-      if (traitId === selectedTrait) {
-        gameState = 'win';
-      } else {
-        showAnswer = true;
-      }
-      
-      renderGame();
-    }
+// Render Pokemon
+function renderPokemon() {
+  elements.pokemonContainer.innerHTML = '';
+  
+  selectedPokemon.forEach((pokemon) => {
+    const pokemonItem = document.createElement('div');
+    pokemonItem.className = 'pokemon-item';
+    
+    const img = document.createElement('img');
+    img.className = 'pokemon-image';
+    img.src = pokemon.iconUrl;
+    img.alt = pokemon.name;
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'input-box filled';
+    nameDiv.textContent = pokemon.name;
+    
+    pokemonItem.appendChild(img);
+    pokemonItem.appendChild(nameDiv);
+    
+    elements.pokemonContainer.appendChild(pokemonItem);
+  });
+}
 
-    // Render the game UI
-    function renderGame() {
-      const gameContainer = document.getElementById('game-container');
-      
-      if (gameState === 'loading') {
-        gameContainer.innerHTML = `
-          <div class="loading">
-            Loading Pokefive Game...
-          </div>
-        `;
-        return;
-      }
-      
-      // Create Pokemon cards HTML
-      const pokemonCardsHTML = selectedPokemon.map(pokemon => `
-        <div class="pokemon-card">
-          <img src="${pokemon.iconUrl}" alt="${pokemon.name}" class="pokemon-img">
-          <div class="pokemon-name">${pokemon.name}</div>
-        </div>
-      `).join('');
-      
-      // Create trait buttons HTML
-      const traitButtonsHTML = traits.map(trait => {
-        let buttonClass = 'trait-btn';
-        
-        if (gameState === 'win' && trait.id === selectedTrait) {
-          buttonClass += ' correct';
-        } else if (showAnswer && trait.id === selectedTrait) {
-          buttonClass += ' answer';
-        }
-        
-        return `
-          <button class="${buttonClass}" 
-                  onclick="handleGuess('${trait.id}')"
-                  ${(gameState === 'win' || showAnswer) ? 'disabled' : ''}>
-            ${trait.name}
-          </button>
-        `;
-      }).join('');
-      
-      // Create result message HTML
-      let resultMessageHTML = '';
-      
-      if (gameState === 'win') {
-        const traitName = traits.find(t => t.id === selectedTrait).name;
-        resultMessageHTML = `
-          <div class="result-message success">
-            <p>Correct! 🎉</p>
-            <p>All these Pokémon share the ${traitName}: <strong>${selectedTraitValue}</strong></p>
-          </div>
-        `;
-      } else if (showAnswer) {
-        const traitName = traits.find(t => t.id === selectedTrait).name;
-        resultMessageHTML = `
-          <div class="result-message error">
-            <p>Not quite! Try again!</p>
-            <p>These Pokémon share the ${traitName}: <strong>${selectedTraitValue}</strong></p>
-          </div>
-        `;
-      }
-      
-      // Assemble the full HTML
-      gameContainer.innerHTML = `
-        <div class="pokemon-container">
-          ${pokemonCardsHTML}
-        </div>
-        
-        <div class="question-section">
-          <h2>Which trait do these Pokémon share?</h2>
-          <div class="traits-buttons">
-            ${traitButtonsHTML}
-          </div>
-        </div>
-        
-        ${resultMessageHTML}
-        
-        <div class="button-container">
-          <button class="new-game-btn" onclick="startNewGame()">New Game</button>
-          <button class="help-button" onclick="openHelpModal()">Help</button>
-        </div>
-      `;
+// Render trait buttons
+function renderTraitButtons() {
+  elements.traitBank.innerHTML = '';
+  
+  traits.forEach(trait => {
+    const traitButton = document.createElement('div');
+    traitButton.className = 'trait-item';
+    traitButton.textContent = trait.name;
+    traitButton.dataset.traitId = trait.id;
+    traitButton.addEventListener('click', handleTraitClick);
+    
+    elements.traitBank.appendChild(traitButton);
+  });
+}
+
+// Handle trait click
+function handleTraitClick(event) {
+  const traitButton = event.currentTarget;
+  const traitId = traitButton.dataset.traitId;
+  
+  // Check if ALL selected Pokémon share this trait value
+  const firstPokemon = selectedPokemon[0];
+  const selectedTraitValue = firstPokemon[traitId];
+  const allShareTrait = selectedPokemon.every(pokemon => pokemon[traitId] === selectedTraitValue);
+  
+  if (allShareTrait) {
+    gameState = 'win';
+    showWinMessage();
+    highlightCorrectTrait(traitId, selectedTraitValue);
+  } else {
+    showToast('Try again! Not all Pokémon share that trait.');
+    
+    if (answerRevealed) {
+      highlightCorrectTrait(selectedTrait, selectedTraitValue);
     }
-  </script>
+  }
+}
+
+// Highlight correct trait
+function highlightCorrectTrait(traitId, traitValue) {
+  const traitButtons = elements.traitBank.querySelectorAll('.trait-item');
+  
+  traitButtons.forEach(button => {
+    if (button.dataset.traitId === traitId) {
+      button.classList.add('correct');
+      button.style.backgroundColor = 'var(--color-correct)';
+      button.style.color = 'white';
+    }
+  });
+  
+  // Update the question text with the answer
+  elements.questionText.innerHTML = `All these Pokémon share the ${traits.find(t => t.id === traitId).name}: <strong>${traitValue}</strong>`;
+  elements.questionText.style.color = 'var(--color-correct)';
+}
+
+// Show win message
+function showWinMessage() {
+  // Create win message if it doesn't exist
+  if (!document.getElementById('win-message')) {
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'win-message';
+    
+    const trophy = document.createElement('span');
+    trophy.className = 'trophy';
+    trophy.textContent = '🏆';
+    messageDiv.appendChild(trophy);
+    
+    const text = document.createElement('div');
+    text.textContent = ['Amazing!', 'Poké-tastic!', 'That\'s Pokefive!'][Math.floor(Math.random() * 3)];
+    messageDiv.appendChild(text);
+    
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+      messageDiv.remove();
+    }, 3000);
+  }
+}
+
+// Show the answer
+function revealAnswer() {
+  answerRevealed = true;
+  highlightCorrectTrait(selectedTrait, selectedTraitValue);
+}
+
+// Show toast message
+function showToast(message) {
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  toast.offsetHeight;
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+// Setup help modal
+function setupHelpModal() {
+  elements.helpButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    elements.helpModal.classList.remove('hidden');
+  });
+  
+  elements.helpModal.addEventListener('click', (e) => {
+    if (e.target === elements.helpModal) {
+      elements.helpModal.classList.add('hidden');
+    }
+  });
+  
+  const modalContent = elements.helpModal.querySelector('.bg-white');
+  modalContent.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  // Set up button event listeners
+  elements.newGameButton.addEventListener('click', startNewGame);
+  elements.showAnswerButton.addEventListener('click', revealAnswer);
+}
+</script>
 </body>
 </html>
