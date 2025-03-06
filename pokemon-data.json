@@ -1979,6 +1979,17 @@
           "weightCategory": "Featherweight",
           "heightCategory": "Tiny",
           "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/996.png"
+        },
+        {
+          "name": "Terapagos",
+          "mainType": "Normal",
+          "evolutionStage": "Basic",
+          "generation": 9,
+          "weight": 77.0,
+          "height": 0.3,
+          "weightCategory": "Heavyweight",
+          "heightCategory": "Tiny",
+          "iconUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1024.png"
         }
       ]
 }
