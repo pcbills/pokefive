@@ -61,6 +61,22 @@ body {
   color: #1a1a1b;
 }
 
+.game-info {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#round-info {
+  color: #333;
+}
+
+#points-info {
+  color: var(--color-correct);
+  margin-left: 20px;
+}
+
 #help-button {
   position: absolute;
   right: 1rem;
@@ -205,6 +221,11 @@ body {
   filter: brightness(1.1);
 }
 
+.control-button:disabled {
+  background-color: var(--color-border);
+  cursor: not-allowed;
+}
+
 /* Win message */
 #win-message {
   position: fixed;
@@ -216,6 +237,23 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2), 0 0 20px rgba(106, 170, 100, 0.6);
   font-size: 32px;
+  font-weight: bold;
+  color: var(--color-correct);
+  z-index: 1000;
+  text-align: center;
+  animation: celebrate 0.6s ease-in-out;
+}
+
+.round-success {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 15px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 23px 0 rgba(0, 0, 0, 0.2), 0 0 20px rgba(106, 170, 100, 0.6);
+  font-size: 24px;
   font-weight: bold;
   color: var(--color-correct);
   z-index: 1000;
@@ -358,12 +396,27 @@ body {
 .other-games-button:hover {
   filter: brightness(1.1);
 }
+
+/* Next round button */
+#next-round-button {
+  display: none;
+  background-color: #2196F3;
+}
+
+#next-round-button.visible {
+  display: inline-block;
+}
 </style>
 </head>
 <body>
 <div class="game-header">
 <h1 class="game-title">Pokéfive</h1>
 <button id="help-button">?</button>
+</div>
+
+<div class="game-info">
+  <span id="round-info">Round 1/5</span>
+  <span id="points-info">Points: 0/25</span>
 </div>
 
 <div class="game-container">
@@ -382,6 +435,7 @@ body {
 
 <div class="control-buttons">
   <button id="new-game-button" class="control-button">New Game</button>
+  <button id="next-round-button" class="control-button">Next Round</button>
   <button id="show-answer-button" class="control-button">Show Answer</button>
   <a href="https://playfivegames.com" class="control-button other-games-button">Play other fivegames!</a>
 </div>
@@ -404,8 +458,9 @@ body {
       <ol class="list-decimal">
         <li style="margin-top: 0.5rem;">Look at the five displayed Pokémon</li>
         <li style="margin-top: 0.5rem;">Click on the trait button you think all five Pokémon share</li>
-        <li style="margin-top: 0.5rem;">If correct, you win! If not, keep trying</li>
-        <li style="margin-top: 0.5rem;">Click "New Game" for a new set of Pokémon</li>
+        <li style="margin-top: 0.5rem;">If correct, you win the round! If not, keep trying</li>
+        <li style="margin-top: 0.5rem;">Complete 5 rounds to finish a game</li>
+        <li style="margin-top: 0.5rem;">Earn points based on how quickly you guess: 5 points on first guess, 4 on second, etc.</li>
       </ol>
     </div>
 
@@ -431,8 +486,15 @@ let pokemonData = [];
 let selectedPokemon = [];
 let selectedTrait = '';
 let selectedTraitValue = '';
-let gameState = 'loading'; // loading, playing, win
+let gameState = 'loading'; // loading, playing, roundWin, gameWin
 let answerRevealed = false;
+
+// Game progress tracking
+let currentRound = 1;
+let totalRounds = 5;
+let currentPoints = 0;
+let maxPossiblePoints = 25;
+let guessesInCurrentRound = 0;
 
 // Define the possible traits
 const traits = [
@@ -449,17 +511,28 @@ const elements = {
   questionText: document.getElementById('question-text'),
   traitBank: document.getElementById('trait-bank'),
   newGameButton: document.getElementById('new-game-button'),
+  nextRoundButton: document.getElementById('next-round-button'),
   showAnswerButton: document.getElementById('show-answer-button'),
   helpButton: document.getElementById('help-button'),
   helpModal: document.getElementById('help-modal'),
-  loading: document.getElementById('loading')
+  loading: document.getElementById('loading'),
+  roundInfo: document.getElementById('round-info'),
+  pointsInfo: document.getElementById('points-info')
 };
 
 // Initialize the game
 document.addEventListener('DOMContentLoaded', () => {
   loadPokemonData();
   setupHelpModal();
+  setupButtonListeners();
 });
+
+// Set up button event listeners
+function setupButtonListeners() {
+  elements.newGameButton.addEventListener('click', startNewGame);
+  elements.nextRoundButton.addEventListener('click', startNextRound);
+  elements.showAnswerButton.addEventListener('click', revealAnswer);
+}
 
 // Load Pokemon data from external JSON file
 function loadPokemonData() {
@@ -500,7 +573,25 @@ function loadPokemonData() {
 function startNewGame() {
   if (pokemonData.length === 0) return;
   
+  // Reset game state
+  currentRound = 1;
+  currentPoints = 0;
+  gameState = 'playing';
+  
+  updateGameInfo();
+  
+  // Hide next round button
+  elements.nextRoundButton.classList.remove('visible');
+  
+  startRound();
+}
+
+// Start a new round
+function startRound() {
+  if (pokemonData.length === 0) return;
+  
   answerRevealed = false;
+  guessesInCurrentRound = 0;
   
   // Reset the question text
   elements.questionText.textContent = "What do these 5 Pokémon have in common?";
@@ -531,7 +622,7 @@ function startNewGame() {
   if (tempMatchingPokemon.length < 5) {
     console.error('Not enough Pokemon with this trait value:', chosenTrait, chosenValue);
     // Try again with a different trait
-    startNewGame();
+    startRound();
     return;
   }
   
@@ -546,6 +637,27 @@ function startNewGame() {
   
   renderPokemon();
   renderTraitButtons();
+}
+
+// Start next round
+function startNextRound() {
+  currentRound++;
+  
+  // Check if game is over
+  if (currentRound > totalRounds) {
+    showGameWinMessage();
+    return;
+  }
+  
+  updateGameInfo();
+  elements.nextRoundButton.classList.remove('visible');
+  startRound();
+}
+
+// Update game info display
+function updateGameInfo() {
+  elements.roundInfo.textContent = `Round ${currentRound}/${totalRounds}`;
+  elements.pointsInfo.textContent = `Points: ${currentPoints}/${maxPossiblePoints}`;
 }
 
 // Render Pokemon
@@ -589,8 +701,13 @@ function renderTraitButtons() {
 
 // Handle trait click
 function handleTraitClick(event) {
+  if (gameState !== 'playing') return;
+  
   const traitButton = event.currentTarget;
   const traitId = traitButton.dataset.traitId;
+  
+  // Increment guess counter
+  guessesInCurrentRound++;
   
   // Check if ALL selected Pokémon share this trait value
   const firstPokemon = selectedPokemon[0];
@@ -598,9 +715,25 @@ function handleTraitClick(event) {
   const allShareTrait = selectedPokemon.every(pokemon => pokemon[traitId] === selectedTraitValue);
   
   if (allShareTrait) {
-    gameState = 'win';
-    showWinMessage();
+    gameState = 'roundWin';
+    
+    // Calculate points based on number of guesses (max 5 points for first guess)
+    const pointsEarned = Math.max(6 - guessesInCurrentRound, 1);
+    currentPoints += pointsEarned;
+    
+    updateGameInfo();
+    showRoundWinMessage(pointsEarned);
     highlightCorrectTrait(traitId, selectedTraitValue);
+    
+    // Show next round button
+    elements.nextRoundButton.classList.add('visible');
+    
+    // If final round, show game win message
+    if (currentRound === totalRounds) {
+      setTimeout(() => {
+        showGameWinMessage();
+      }, 2000);
+    }
   } else {
     showToast('Try again! Not all Pokémon share that trait.');
     
@@ -627,34 +760,67 @@ function highlightCorrectTrait(traitId, traitValue) {
   elements.questionText.style.color = 'var(--color-correct)';
 }
 
-// Show win message
-function showWinMessage() {
-  // Create win message if it doesn't exist
-  if (!document.getElementById('win-message')) {
-    const messageDiv = document.createElement('div');
-    messageDiv.id = 'win-message';
-    
-    const trophy = document.createElement('span');
-    trophy.className = 'trophy';
-    trophy.textContent = '🏆';
-    messageDiv.appendChild(trophy);
-    
-    const text = document.createElement('div');
-    text.textContent = ['Amazing!', 'Poké-tastic!', 'That\'s Pokéfive!'][Math.floor(Math.random() * 3)];
-    messageDiv.appendChild(text);
-    
-    document.body.appendChild(messageDiv);
-    
-    setTimeout(() => {
-      messageDiv.remove();
-    }, 3000);
+// Show round win message
+function showRoundWinMessage(pointsEarned) {
+  // Create round success message
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'round-success';
+  
+  const text = document.createElement('div');
+  text.innerHTML = `<span>+${pointsEarned} points!</span>`;
+  messageDiv.appendChild(text);
+  
+  document.body.appendChild(messageDiv);
+  
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 2000);
+}
+
+// Show game win message
+function showGameWinMessage() {
+  // Create win message
+  const messageDiv = document.createElement('div');
+  messageDiv.id = 'win-message';
+  
+  const trophy = document.createElement('span');
+  trophy.className = 'trophy';
+  trophy.textContent = '🏆';
+  messageDiv.appendChild(trophy);
+  
+  const text = document.createElement('div');
+  text.innerHTML = `Game Complete!<br><span style="font-size: 24px;">Your score: ${currentPoints}/${maxPossiblePoints} points</span>`;
+  
+  // Add perfect game message if applicable
+  if (currentPoints === maxPossiblePoints) {
+    const perfectText = document.createElement('div');
+    perfectText.textContent = "Perfect game!";
+    perfectText.style.color = "gold";
+    perfectText.style.marginTop = "10px";
+    text.appendChild(perfectText);
   }
+  
+  messageDiv.appendChild(text);
+  
+  document.body.appendChild(messageDiv);
+  
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 5000);
+  
+  // Hide next round button and disable other buttons
+  elements.nextRoundButton.classList.remove('visible');
 }
 
 // Show the answer
 function revealAnswer() {
+  if (gameState !== 'playing') return;
+  
   answerRevealed = true;
   highlightCorrectTrait(selectedTrait, selectedTraitValue);
+  
+  // Show next round button since the player is skipping this round
+  elements.nextRoundButton.classList.add('visible');
 }
 
 // Show toast message
@@ -695,10 +861,6 @@ function setupHelpModal() {
   modalContent.addEventListener('click', (e) => {
     e.stopPropagation();
   });
-  
-  // Set up button event listeners
-  elements.newGameButton.addEventListener('click', startNewGame);
-  elements.showAnswerButton.addEventListener('click', revealAnswer);
 }
 </script>
 </body>
